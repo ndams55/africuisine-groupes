@@ -22,7 +22,7 @@
       color: var(--ink);
       font: 16px/1.5 "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
     }
-    main { max-width: 1080px; margin: 0 auto; padding: 40px 20px 80px; }
+    main { max-width: 1240px; margin: 0 auto; padding: 40px 20px 80px; }
     h1 { font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px; }
     h2 { font-size: 1.25rem; margin: 0 0 12px; }
     p { margin: 0; }
@@ -64,8 +64,8 @@
     .caption { color: var(--muted); font-size: 0.85rem; margin-top: 8px; }
     .scroll { overflow-x: auto; border: 1px solid var(--line); }
     .compare-scroll { overflow-x: auto; margin-top: 12px; }
-    .compare-row { display: flex; gap: 16px; align-items: flex-start; min-width: 1080px; }
-    .share-chart { flex: 1 0 480px; margin: 0; background: var(--paper); border: 1px solid var(--line); padding: 14px 16px 10px; }
+    .compare-row { display: grid; grid-template-columns: minmax(420px, 0.9fr) minmax(560px, 1.15fr); gap: 16px; align-items: start; }
+    .share-chart { margin: 0; background: var(--paper); border: 1px solid var(--line); padding: 14px 16px 10px; }
     .share-row, .share-axis { display: grid; grid-template-columns: 118px minmax(180px, 1fr) 44px; gap: 8px; align-items: center; }
     .share-row { margin: 4px 0; font-size: 0.88rem; }
     .share-name { white-space: nowrap; }
@@ -74,7 +74,7 @@
     .share-value { font-variant-numeric: tabular-nums; text-align: right; }
     .share-axis { margin-top: 6px; color: var(--muted); font-size: 0.75rem; }
     .share-scale { display: flex; justify-content: space-between; }
-    .compare-table { flex: 1.15 0 620px; }
+    .compare-table { min-width: 0; }
     .top { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; }
     .lang { display: flex; gap: 8px; flex: none; }
     @media (max-width: 800px) {
