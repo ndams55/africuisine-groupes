@@ -63,6 +63,18 @@
     .bar { height: 8px; background: var(--bar); }
     .caption { color: var(--muted); font-size: 0.85rem; margin-top: 8px; }
     .scroll { overflow-x: auto; border: 1px solid var(--line); }
+    .compare-scroll { overflow-x: auto; margin-top: 12px; }
+    .compare-row { display: flex; gap: 16px; align-items: flex-start; min-width: 1080px; }
+    .share-chart { flex: 1 0 480px; margin: 0; background: var(--paper); border: 1px solid var(--line); padding: 14px 16px 10px; }
+    .share-row, .share-axis { display: grid; grid-template-columns: 118px minmax(180px, 1fr) 44px; gap: 8px; align-items: center; }
+    .share-row { margin: 4px 0; font-size: 0.88rem; }
+    .share-name { white-space: nowrap; }
+    .share-track { height: 16px; background: #efeae3; }
+    .share-fill { display: block; height: 100%; background: #3c7ea6; }
+    .share-value { font-variant-numeric: tabular-nums; text-align: right; }
+    .share-axis { margin-top: 6px; color: var(--muted); font-size: 0.75rem; }
+    .share-scale { display: flex; justify-content: space-between; }
+    .compare-table { flex: 1.15 0 620px; }
     .top { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; }
     .lang { display: flex; gap: 8px; flex: none; }
     @media (max-width: 800px) {
@@ -108,7 +120,15 @@
     <section>
       <h2 id="compare-title"></h2>
       <p class="lede" id="compare-lede"></p>
-      <div class="scroll" style="margin-top:12px"><table id="overview"></table></div>
+      <div class="compare-scroll">
+        <div class="compare-row">
+          <figure class="share-chart">
+            <div id="share-chart"></div>
+            <p class="caption" id="share-caption"></p>
+          </figure>
+          <div class="scroll compare-table"><table id="overview"></table></div>
+        </div>
+      </div>
     </section>
   </main>
   <script>
@@ -141,6 +161,7 @@
         none: "Aucun libellé ne correspond.",
         compareTitle: "Comparaison des pays",
         compareLede: "Chaque pays additionne ses fichiers de langue. Ghana et le Kenya ne comptent pas deux fois leur copie identique.",
+        shareCaption: "Part du libellé le plus fréquent. Axe des catégories : pays. Axe des valeurs : pourcentage des plats du pays.",
         compareHeaders: ["Pays", "Plats", "Libellés", "Libellé le plus fréquent", "Exemples", "Part"],
       },
       en: {
@@ -168,6 +189,7 @@
         none: "No label matches this filter.",
         compareTitle: "Country comparison",
         compareLede: "Each country adds up its language files. Ghana and Kenya do not count their identical copy twice.",
+        shareCaption: "Share of the most frequent label. Categories: country. Values: percent of that country’s dishes.",
         compareHeaders: ["Country", "Dishes", "Labels", "Most frequent label", "Examples", "Share"],
       },
     };
@@ -266,6 +288,13 @@
       queryInput.placeholder = copy.placeholder;
       document.querySelector("#compare-title").textContent = copy.compareTitle;
       document.querySelector("#compare-lede").textContent = copy.compareLede;
+      document.querySelector("#share-caption").textContent = copy.shareCaption;
+      const byShare = [...overview].sort((a, b) => b.share - a.share || a.name.localeCompare(b.name, lang));
+      document.querySelector("#share-chart").innerHTML = byShare.map((item) => {
+        const country = COUNTRIES.find((entry) => entry.name === item.name);
+        const name = country ? displayCountry(country) : item.name;
+        return `<div class="share-row"><span class="share-name">${name}</span><span class="share-track"><span class="share-fill" style="width:${item.share}%"></span></span><span class="share-value">${item.share}%</span></div>`;
+      }).join("") + `<div class="share-axis" aria-hidden="true"><span></span><span class="share-scale"><span>0%</span><span>50%</span><span>100%</span></span><span></span></div>`;
       const selectedId = countrySelect.value;
       countrySelect.innerHTML = COUNTRIES.map((country) => `<option value="${country.id}">${displayCountry(country)}</option>`).join("");
       countrySelect.value = selectedId || "benin";
