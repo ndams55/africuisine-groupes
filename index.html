@@ -33,7 +33,6 @@
     .stat b { display: block; font-size: 1.6rem; font-variant-numeric: tabular-nums; }
     .stat span { color: var(--muted); font-size: 0.85rem; }
     section { margin-top: 36px; }
-    .note { background: var(--accent-soft); border: 1px solid #e4cfc7; padding: 12px 14px; margin-top: 16px; font-size: 0.95rem; }
     .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
     label { font-size: 0.85rem; color: var(--muted); }
     select, input[type="search"] {
@@ -104,7 +103,6 @@
       </div>
     </div>
     <div class="stats" id="stats"></div>
-    <div class="note" id="method"></div>
 
     <section id="rules-section">
       <h2 id="rules-title"></h2>
@@ -150,7 +148,6 @@
         dishes: "Plats, copies identiques comptées une fois",
         files: (n) => `Fichiers comptés, sur ${n} feuilles`,
         empty: "Cellules vides dans cette colonne",
-        method: "Ghana : Ewe reprend les plats de Twi. Kenya : Kalenjin reprend les plats de Luo. Ces plats ne sont pas additionnés. Le Sénégal, le Soudan et le Burkina Faso ne sont pas dans ce décompte.",
         rulesTitle: "Harmonisations",
         rulesCaption: "Le libellé retenu est celui fixé pour chaque regroupement.",
         rulesHeaders: ["Pays", "Forme d’origine", "Libellé retenu"],
@@ -178,7 +175,6 @@
         dishes: "Dishes, identical copies counted once",
         files: (n) => `Files counted, out of ${n} sheets`,
         empty: "Empty cells in this column",
-        method: "Ghana: Ewe repeats the Twi dishes. Kenya: Kalenjin repeats the Luo dishes. Those dishes are not added twice. Senegal, Sudan, and Burkina Faso are not in this count.",
         rulesTitle: "Harmonizations",
         rulesCaption: "The kept label is the one set for each grouping.",
         rulesHeaders: ["Country", "Original form", "Kept label"],
@@ -285,7 +281,6 @@
         [String(countedFiles), copy.files(sheetCount)],
         ["0", copy.empty],
       ].map(([value, label]) => `<div class="stat"><b>${value}</b><span>${label}</span></div>`).join("");
-      document.querySelector("#method").textContent = copy.method;
       document.querySelector("#rules-section").hidden = RULES.length === 0;
       document.querySelector("#rules-title").textContent = copy.rulesTitle;
       document.querySelector("#rules-caption").textContent = copy.rulesCaption;
