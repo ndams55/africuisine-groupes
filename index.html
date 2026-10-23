@@ -193,7 +193,7 @@
         countries: "Pays",
         dishes: "Plats, copies identiques comptées une fois",
         files: (n) => `Fichiers comptés, sur ${n} feuilles`,
-        empty: "Cellules vides dans cette colonne",
+        oneGroupStat: "Plats des 102 communautés distinctes",
         rulesTitle: "Harmonisations",
         rulesCaption: "Le libellé retenu est celui fixé pour chaque regroupement.",
         rulesHeaders: ["Pays", "Forme d’origine", "Libellé retenu"],
@@ -231,7 +231,7 @@
         countries: "Countries",
         dishes: "Dishes, identical copies counted once",
         files: (n) => `Files counted, out of ${n} sheets`,
-        empty: "Empty cells in this column",
+        oneGroupStat: "Dishes in the 102 distinct communities",
         rulesTitle: "Harmonizations",
         rulesCaption: "The kept label is the one set for each grouping.",
         rulesHeaders: ["Country", "Original form", "Kept label"],
@@ -370,7 +370,7 @@
         [String(COUNTRIES.length), copy.countries],
         [String(totalDishes), copy.dishes],
         [String(countedFiles), copy.files(sheetCount)],
-        ["0", copy.empty],
+        [String(oneGroupDishes), copy.oneGroupStat],
         [String(distinctTotal), copy.distinctStat],
     ].map(([value, label]) => `<div class="stat"><b>${value}</b><span>${label}</span></div>`).join("");
       document.querySelector("#pie-title").textContent = copy.pieTitle;
