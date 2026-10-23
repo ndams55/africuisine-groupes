@@ -88,6 +88,15 @@
     .pie-row { display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
     .pie-row svg { width: min(240px, 100%); height: auto; flex: none; }
     .pie-legend { list-style: none; margin: 0; padding: 0; }
+    .group-board { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; align-items: start; }
+    .group-card { background: var(--paper); border: 1px solid var(--line); padding: 12px 14px 10px; }
+    .group-card h3 { margin: 0 0 10px; font-size: 1rem; font-weight: 600; display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+    .group-card h3 span { color: var(--muted); font-weight: 400; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+    .gbar { margin: 7px 0 0; }
+    .gbar-top { display: flex; justify-content: space-between; gap: 10px; font-size: 0.88rem; }
+    .gbar-top b { font-variant-numeric: tabular-nums; font-weight: 600; }
+    .gbar-track { display: block; height: 8px; margin-top: 3px; background: #efeae3; }
+    .gbar-fill { display: block; height: 100%; background: var(--bar); }
     .pie-legend li { display: flex; gap: 10px; align-items: baseline; margin: 10px 0; }
     .swatch { width: 0.85rem; height: 0.85rem; flex: none; transform: translateY(0.1rem); }
     .share-value { font-variant-numeric: tabular-nums; text-align: right; }
@@ -167,7 +176,8 @@
         <div id="distinct-chart"></div>
         <p class="caption" id="distinct-caption"></p>
       </figure>
-      <div class="scroll"><table id="single-groups"></table></div>
+      <p class="caption" id="single-scale"></p>
+      <div class="group-board" id="single-groups"></div>
       <p class="caption" id="single-note"></p>
     </section>
   </main>
@@ -206,8 +216,9 @@
         distinctTitle: "Groupes distincts par pays",
         distinctLede: "Nombre de groupes qui ne citent qu’un seul peuple, dans chaque pays.",
         distinctCaption: (total) => `${total} communautés distinctes.`,
-        singleHeaders: ["Pays", "Groupes", "Plats"],
-        singleNote: "Le tableau compte 112 groupes–pays, soit 102 noms de groupes distincts après déduplication entre pays, notamment Abakiga/Bakiga. Ces 102 noms comprennent encore des groupes et leurs sous-groupes, comme Oromo / Shewa Oromo ou Yoruba / Ìjẹ̀bú : ce n’est donc pas un total de groupes sans chevauchement.",
+        singleScale: "Chaque pays liste ses groupes. La barre donne le nombre de plats, sur la même échelle partout.",
+        singleDishes: (n) => `${n} plats`,
+        singleNote: "On compte 112 groupes–pays, soit 102 noms de groupes distincts après déduplication entre pays, notamment Abakiga/Bakiga. Ces 102 noms comprennent encore des groupes et leurs sous-groupes, comme Oromo / Shewa Oromo ou Yoruba / Ìjẹ̀bú : ce n’est donc pas un total de groupes sans chevauchement.",
         pieTitle: "Plats avec exactement un groupe",
         pieLede: "Le secteur principal reprend les plats rattachés à un seul groupe. L’autre secteur rassemble le reste du corpus.",
         pieOne: "Exactement un groupe",
@@ -243,8 +254,9 @@
         distinctTitle: "Distinct groups by country",
         distinctLede: "Number of groups that name only one people, in each country.",
         distinctCaption: (total) => `${total} distinct communities.`,
-        singleHeaders: ["Country", "Groups", "Dishes"],
-        singleNote: "The table counts 112 group–country pairs, that is 102 distinct group names after names repeated across countries are counted once, notably Abakiga/Bakiga. These 102 names still include groups and their subgroups, such as Oromo / Shewa Oromo or Yoruba / Ìjẹ̀bú, so this is not a total of groups without overlap.",
+        singleScale: "Each country lists its groups. The bar is the number of dishes, on the same scale everywhere.",
+        singleDishes: (n) => `${n} dishes`,
+        singleNote: "This count covers 112 group–country pairs, that is 102 distinct group names after names repeated across countries are counted once, notably Abakiga/Bakiga. These 102 names still include groups and their subgroups, such as Oromo / Shewa Oromo or Yoruba / Ìjẹ̀bú, so this is not a total of groups without overlap.",
         pieTitle: "Dishes with exactly one group",
         pieLede: "The main slice is the dishes tied to a single group. The other slice is the rest of the corpus.",
         pieOne: "Exactly one group",
@@ -390,15 +402,26 @@
       document.querySelector("#distinct-title").textContent = copy.distinctTitle;
       document.querySelector("#distinct-lede").textContent = copy.distinctLede;
       document.querySelector("#distinct-caption").textContent = copy.distinctCaption(distinctTotal);
+      document.querySelector("#single-scale").textContent = copy.singleScale;
       document.querySelector("#single-note").textContent = copy.singleNote;
-      document.querySelector("#single-groups").innerHTML = table(
-        copy.singleHeaders,
-        SINGLE_GROUPS.map((row) => {
-          const country = COUNTRIES.find((entry) => entry.id === row.id);
-          return [country ? displayCountry(country) : row.id, row.groups, String(row.dishes)];
-        }),
-        [2]
-      );
+      const parsedGroups = SINGLE_GROUPS.map((row) => ({
+        ...row,
+        items: row.groups.split(" ; ").map((part) => {
+          const match = part.match(/^(.*) (\d+)$/);
+          return { name: match[1], dishes: Number(match[2]) };
+        }).sort((a, b) => b.dishes - a.dishes || a.name.localeCompare(b.name, lang)),
+      }));
+      const dishMax = Math.max(...parsedGroups.flatMap((row) => row.items.map((item) => item.dishes)));
+      const esc = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      document.querySelector("#single-groups").innerHTML = parsedGroups.map((row) => {
+        const country = COUNTRIES.find((entry) => entry.id === row.id);
+        const name = country ? displayCountry(country) : row.id;
+        const lines = row.items.map((item) => {
+          const width = Math.max(4, Math.round((100 * item.dishes) / dishMax));
+          return `<div class="gbar"><div class="gbar-top"><span>${esc(item.name)}</span><b>${item.dishes}</b></div><span class="gbar-track"><span class="gbar-fill" style="width:${width}%"></span></span></div>`;
+        }).join("");
+        return `<article class="group-card"><h3>${esc(name)}<span>${copy.singleDishes(row.dishes)}</span></h3>${lines}</article>`;
+      }).join("");
       const byLabels = [...SINGLE_GROUPS].sort((a, b) => b.count - a.count || a.id.localeCompare(b.id));
       const axisMax = Math.max(10, Math.ceil(Math.max(...byLabels.map((item) => item.count)) / 10) * 10);
       const bars = byLabels.map((item) => {
