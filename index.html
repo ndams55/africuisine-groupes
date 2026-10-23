@@ -167,6 +167,8 @@
         <div id="distinct-chart"></div>
         <p class="caption" id="distinct-caption"></p>
       </figure>
+      <div class="scroll"><table id="single-groups"></table></div>
+      <p class="caption" id="single-note"></p>
     </section>
   </main>
   <script>
@@ -202,8 +204,10 @@
         compareHeaders: ["Pays", "Plats", "Libellés", "Libellé le plus fréquent", "Exemples", "Part"],
         distinctStat: "Communautés distinctes",
         distinctTitle: "Groupes distincts par pays",
-        distinctLede: "Nombre de libellés différents dans chaque pays, après les harmonisations.",
+        distinctLede: "Nombre de groupes qui ne citent qu’un seul peuple, dans chaque pays.",
         distinctCaption: (total) => `${total} communautés distinctes.`,
+        singleHeaders: ["Pays", "Groupes", "Plats"],
+        singleNote: "Le tableau compte 112 groupes–pays, soit 102 noms de groupes distincts après déduplication entre pays, notamment Abakiga/Bakiga. Ces 102 noms comprennent encore des groupes et leurs sous-groupes, comme Oromo / Shewa Oromo ou Yoruba / Ìjẹ̀bú : ce n’est donc pas un total de groupes sans chevauchement.",
         pieTitle: "Plats avec exactement un groupe",
         pieLede: "Le secteur principal reprend les plats rattachés à un seul groupe. L’autre secteur rassemble le reste du corpus.",
         pieOne: "Exactement un groupe",
@@ -237,8 +241,10 @@
         compareHeaders: ["Country", "Dishes", "Labels", "Most frequent label", "Examples", "Share"],
         distinctStat: "Distinct communities",
         distinctTitle: "Distinct groups by country",
-        distinctLede: "Number of different labels in each country, after the harmonizations.",
+        distinctLede: "Number of groups that name only one people, in each country.",
         distinctCaption: (total) => `${total} distinct communities.`,
+        singleHeaders: ["Country", "Groups", "Dishes"],
+        singleNote: "The table counts 112 group–country pairs, that is 102 distinct group names after names repeated across countries are counted once, notably Abakiga/Bakiga. These 102 names still include groups and their subgroups, such as Oromo / Shewa Oromo or Yoruba / Ìjẹ̀bú, so this is not a total of groups without overlap.",
         pieTitle: "Dishes with exactly one group",
         pieLede: "The main slice is the dishes tied to a single group. The other slice is the rest of the corpus.",
         pieOne: "Exactly one group",
@@ -316,14 +322,29 @@
     const totalDishes = overview.reduce((sum, item) => sum + item.dishes, 0);
     const sheetCount = COUNTRIES.reduce((sum, item) => sum + item.files.length, 0);
     const countedFiles = COUNTRIES.reduce((sum, item) => sum + keptFiles(item).length, 0);
-    const distinctNames = new Set();
-    for (const country of COUNTRIES) {
-      const totals = merge(country.id, keptFiles(country));
-      for (const group of totals.groups) distinctNames.add(group.name);
-    }
-    const distinctTotal = distinctNames.size;
     const oneGroupDishes = 662;
     const otherDishes = totalDishes - oneGroupDishes;
+    const distinctTotal = 102;
+    const SINGLE_GROUPS = [
+      { id: "angola", count: 5, dishes: 39, groups: "Ambundu 17 ; Bakongo 11 ; Kwanyama 1 ; Ovimbundu 8 ; Tchokwe 2" },
+      { id: "benin", count: 7, dishes: 48, groups: "Aja 2 ; Bariba / Baatombu 1 ; Fon 11 ; Goun 5 ; Idaasha 2 ; Mina 4 ; Yoruba 23" },
+      { id: "cameroon", count: 18, dishes: 58, groups: "Bafang 7 ; Baganté 2 ; Bakossi 2 ; Bakweri 2 ; Bamiléké 1 ; Bandjoun 3 ; Bansoa 2 ; Bassa 3 ; Batanga 3 ; Bayangam 8 ; Bayangi / Banyang 2 ; Bouda 1 ; Boulou 4 ; Béti 6 ; Dshang 1 ; Duala 8 ; Fang 1 ; Sawa 2" },
+      { id: "chad", count: 5, dishes: 18, groups: "Ngam 1 ; Ngambaye 5 ; Sara 3 ; Sara Kaba 4 ; Sara Madjingaye 5" },
+      { id: "drc", count: 10, dishes: 38, groups: "Bakongo 14 ; Bangala 1 ; Yombé / BaYombé 5 ; Luba 8 ; Luba-Kasaï 2 ; Luba-Katanga 2 ; Lulua 1 ; Mbala 1 ; Suku / Basuku 1 ; Swahili 3" },
+      { id: "ethiopia", count: 6, dishes: 34, groups: "Amhara 7 ; Gurage 12 ; Oromo 2 ; Shewa Oromo 2 ; Tigray 9 ; Wollega Oromo 2" },
+      { id: "ghana", count: 9, dishes: 39, groups: "Akan 8 ; Bono 1 ; Dagomba 2 ; Ewe 1 ; Fante 2 ; Ga Adangbe / Ga-Dangme 10 ; Ga 11 ; Hausa 3 ; Nzema 1" },
+      { id: "ivory-coast", count: 6, dishes: 16, groups: "Akan 2 ; Fula 1 ; Koulango 1 ; Malinké 2 ; Mandés du Nord 6 ; Sénoufo 4" },
+      { id: "kenya", count: 9, dishes: 50, groups: "Agikuyu / Kikuyu 16 ; Ameru 3 ; Iteso 1 ; Kalenjin 2 ; Kamba 2 ; Luhya 6 ; Luo 5 ; Mijikenda 5 ; Swahili 10" },
+      { id: "madagascar", count: 1, dishes: 24, groups: "Merina 24" },
+      { id: "mali", count: 5, dishes: 52, groups: "Bambara 25 ; Dogon 2 ; Fula 8 ; Sénoufo 8 ; Soninké 9" },
+      { id: "nigeria", count: 5, dishes: 94, groups: "Efik 24 ; Hausa 25 ; Igbo 25 ; Yoruba 19 ; Ìjẹ̀bú 1" },
+      { id: "rwanda", count: 5, dishes: 26, groups: "Abagoyi 4 ; Abakiga 10 ; Abakonyine 1 ; Abashi 1 ; Banyarwanda 10" },
+      { id: "somalie", count: 2, dishes: 4, groups: "Isaaq 3 ; Somali 1" },
+      { id: "south-africa", count: 2, dishes: 12, groups: "Xhosa 4 ; Zulu 8" },
+      { id: "tanzania", count: 5, dishes: 42, groups: "Chagga 1 ; Hehe 24 ; Kurya 1 ; Nyiramba 1 ; Swahili 15" },
+      { id: "uganda", count: 10, dishes: 40, groups: "Acholi 5 ; Baganda 21 ; Bagisu 1 ; Bakiga 1 ; Bakonzo 1 ; Banyankole 5 ; Banyoro 1 ; Basoga 1 ; Iteso 3 ; Lango 1" },
+      { id: "zimbabwe", count: 2, dishes: 28, groups: "Ndebele 2 ; Shona 26" },
+    ];
 
     function paintChrome() {
       const copy = t();
@@ -369,13 +390,22 @@
       document.querySelector("#distinct-title").textContent = copy.distinctTitle;
       document.querySelector("#distinct-lede").textContent = copy.distinctLede;
       document.querySelector("#distinct-caption").textContent = copy.distinctCaption(distinctTotal);
-      const byLabels = [...overview].sort((a, b) => b.labels - a.labels || a.name.localeCompare(b.name, lang));
-      const axisMax = Math.max(10, Math.ceil(Math.max(...byLabels.map((item) => item.labels)) / 10) * 10);
+      document.querySelector("#single-note").textContent = copy.singleNote;
+      document.querySelector("#single-groups").innerHTML = table(
+        copy.singleHeaders,
+        SINGLE_GROUPS.map((row) => {
+          const country = COUNTRIES.find((entry) => entry.id === row.id);
+          return [country ? displayCountry(country) : row.id, row.groups, String(row.dishes)];
+        }),
+        [2]
+      );
+      const byLabels = [...SINGLE_GROUPS].sort((a, b) => b.count - a.count || a.id.localeCompare(b.id));
+      const axisMax = Math.max(10, Math.ceil(Math.max(...byLabels.map((item) => item.count)) / 10) * 10);
       const bars = byLabels.map((item) => {
-        const country = COUNTRIES.find((entry) => entry.name === item.name);
-        const name = country ? displayCountry(country) : item.name;
-        const height = Math.round((100 * item.labels) / axisMax);
-        return `<div class="hist-col"><span class="hist-value">${item.labels}</span><span class="hist-track"><span class="hist-fill" style="height:${height}%"></span></span><span class="hist-name">${name}</span></div>`;
+        const country = COUNTRIES.find((entry) => entry.id === item.id);
+        const name = country ? displayCountry(country) : item.id;
+        const height = Math.round((100 * item.count) / axisMax);
+        return `<div class="hist-col"><span class="hist-value">${item.count}</span><span class="hist-track"><span class="hist-fill" style="height:${height}%"></span></span><span class="hist-name">${name}</span></div>`;
       }).join("");
       document.querySelector("#distinct-chart").innerHTML = `<div class="hist"><div class="hist-y" aria-hidden="true"><span>${axisMax}</span><span>${axisMax / 2}</span><span>0</span></div><div class="hist-scroll"><div class="hist-bars">${bars}</div></div></div>`;
       document.querySelector("#rules-section").hidden = RULES.length === 0;
