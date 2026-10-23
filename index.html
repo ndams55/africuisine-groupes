@@ -32,6 +32,7 @@
     h2 { font-size: 1.25rem; font-weight: 600; margin: 0 0 12px; }
     p { margin: 0; }
     .lede { color: var(--muted); max-width: 68ch; }
+    .lede mark { background: var(--accent-soft); color: var(--ink); font-weight: 600; padding: 0 0.25em; white-space: nowrap; }
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 28px 0; }
     .stat { background: var(--paper); border: 1px solid var(--line); padding: 14px 16px; }
     .stat b { display: block; font-family: Forum, Georgia, serif; font-weight: 400; font-size: 2.4rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
@@ -174,6 +175,7 @@
         title: "Analyse des groupes ethnoculturels",
         pageTitle: "AfriCuisine — Analyse des groupes ethnoculturels",
         lede: "Nous analysons ici la colonne « Social / ethnocultural group association », afin de mieux comprendre la diversité de la couverture culturelle du corpus collecté. L’extraction des données date du 22 octobre.",
+        ledeDate: "22 octobre",
         countries: "Pays",
         dishes: "Plats, copies identiques comptées une fois",
         files: (n) => `Fichiers comptés, sur ${n} feuilles`,
@@ -211,6 +213,7 @@
         title: "Ethnocultural groups analysis",
         pageTitle: "AfriCuisine — Ethnocultural groups analysis",
         lede: "Here we analyse the column “Social / ethnocultural group association”, to better understand the diversity of the cultural coverage of the collected dataset. The data dump was made on October 22nd.",
+        ledeDate: "October 22nd",
         countries: "Countries",
         dishes: "Dishes, identical copies counted once",
         files: (n) => `Files counted, out of ${n} sheets`,
@@ -345,7 +348,7 @@
       document.documentElement.lang = lang;
       document.title = copy.pageTitle;
       document.querySelector("#title").textContent = copy.title;
-      document.querySelector("#lede").textContent = copy.lede;
+      document.querySelector("#lede").innerHTML = copy.lede.replace(copy.ledeDate, `<mark>${copy.ledeDate}</mark>`);
       document.querySelector("#lang-fr").setAttribute("aria-pressed", String(lang === "fr"));
       document.querySelector("#lang-en").setAttribute("aria-pressed", String(lang === "en"));
     document.querySelector("#stats").innerHTML = [
