@@ -5,32 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>AfriCuisine — Groupes ethnoculturels</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=Forum&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f6f3ee;
-      --paper: #fffdf9;
-      --ink: #1c1915;
-      --muted: #5e584f;
-      --line: #e4ddd2;
-      --accent: #8c3d2a;
-      --accent-soft: #f3e6e1;
-      --bar: #8c3d2a;
+      --bg: #f8faf7;
+      --paper: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --accent: #6aa84f;
+      --accent-soft: #d9ead3;
+      --bar: #6aa84f;
+      --track: #eef2ef;
+      --share: #6d9eeb;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       background: var(--bg);
       color: var(--ink);
-      font: 16px/1.5 "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
+      font: 16px/1.5 "DM Sans", "Helvetica Neue", Arial, sans-serif;
     }
     main { max-width: 1240px; margin: 0 auto; padding: 40px 20px 80px; }
-    h1 { font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px; }
-    h2 { font-size: 1.25rem; margin: 0 0 12px; }
+    h1 { font-size: 2.4rem; font-weight: 600; letter-spacing: -0.03em; margin: 0 0 8px; }
+    h2 { font-size: 1.25rem; font-weight: 600; margin: 0 0 12px; }
     p { margin: 0; }
     .lede { color: var(--muted); max-width: 68ch; }
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 28px 0; }
     .stat { background: var(--paper); border: 1px solid var(--line); padding: 14px 16px; }
-    .stat b { display: block; font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+    .stat b { display: block; font-family: Forum, Georgia, serif; font-weight: 400; font-size: 2.4rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
     .stat span { color: var(--muted); font-size: 0.85rem; }
     section { margin-top: 36px; }
     .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
@@ -58,13 +63,14 @@
     th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
     th { font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
     td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-    tr:hover td { background: #faf7f2; }
+    tr:hover td { background: var(--accent-soft); }
+    thead th { background: var(--accent-soft); }
     .bar-cell { width: 28%; }
     .bar { height: 8px; background: var(--bar); }
     .caption { color: var(--muted); font-size: 0.85rem; margin-top: 8px; }
     .scroll { overflow-x: auto; border: 1px solid var(--line); }
     .rules-scroll { overflow: auto; border: 1px solid var(--line); }
-    .rules-scroll thead th { position: sticky; top: 0; background: var(--paper); z-index: 1; }
+    .rules-scroll thead th { position: sticky; top: 0; background: var(--accent-soft); z-index: 1; }
     .compare-scroll { margin-top: 12px; }
     .compare-row { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
     @media (min-width: 1100px) {
@@ -74,15 +80,15 @@
     .share-row, .share-axis { display: grid; grid-template-columns: 7.4rem minmax(0, 1fr) 2.6rem; gap: 8px; align-items: center; }
     .share-row { margin: 4px 0; font-size: 0.88rem; }
     .share-name { white-space: nowrap; }
-    .share-track { height: 16px; background: #efeae3; }
-    .share-fill { display: block; height: 100%; background: #3c7ea6; }
+    .share-track { height: 16px; background: var(--track); }
+    .share-fill { display: block; height: 100%; background: var(--share); }
     .hist { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 8px; }
     .hist-y { display: flex; flex-direction: column; justify-content: space-between; height: 220px; margin-top: 1.1rem; color: var(--muted); font-size: 0.75rem; text-align: right; }
     .hist-scroll { overflow-x: auto; }
     .hist-bars { display: flex; align-items: flex-start; gap: 4px; min-width: 720px; }
     .hist-col { flex: 1 0 0; display: flex; flex-direction: column; align-items: center; min-width: 0; }
     .hist-value { height: 1.1rem; font-size: 0.7rem; line-height: 1.1rem; font-variant-numeric: tabular-nums; }
-    .hist-track { height: 220px; width: 70%; max-width: 28px; background: #efeae3; display: flex; align-items: flex-end; box-shadow: 0 1px 0 var(--line); }
+    .hist-track { height: 220px; width: 70%; max-width: 28px; background: var(--track); display: flex; align-items: flex-end; box-shadow: 0 1px 0 var(--line); }
     .hist-fill { display: block; width: 100%; background: var(--bar); }
     .hist-name { margin-top: 6px; height: 5.6rem; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 0.72rem; white-space: nowrap; }
     .pie-row { display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
@@ -95,7 +101,7 @@
     .gbar { margin: 7px 0 0; }
     .gbar-top { display: flex; justify-content: space-between; gap: 10px; font-size: 0.88rem; }
     .gbar-top b { font-variant-numeric: tabular-nums; font-weight: 600; }
-    .gbar-track { display: block; height: 8px; margin-top: 3px; background: #efeae3; }
+    .gbar-track { display: block; height: 8px; margin-top: 3px; background: var(--track); }
     .gbar-fill { display: block; height: 100%; background: var(--bar); }
     .pie-legend li { display: flex; gap: 10px; align-items: baseline; margin: 10px 0; }
     .swatch { width: 0.85rem; height: 0.85rem; flex: none; transform: translateY(0.1rem); }
@@ -376,8 +382,8 @@
       document.querySelector("#pie-title").textContent = copy.pieTitle;
       document.querySelector("#pie-lede").textContent = copy.pieLede;
       const pieSlices = [
-        { label: copy.pieOne, count: oneGroupDishes, color: "#8c3d2a" },
-        { label: copy.pieOther, count: otherDishes, color: "#3c7ea6" },
+        { label: copy.pieOne, count: oneGroupDishes, color: "#6aa84f" },
+        { label: copy.pieOther, count: otherDishes, color: "#6d9eeb" },
       ];
       const pieTotal = pieSlices.reduce((sum, slice) => sum + slice.count, 0);
       function piePath(start, end) {
