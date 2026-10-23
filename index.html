@@ -179,7 +179,7 @@
         distinctStat: "Communautés distinctes",
         distinctTitle: "Groupes distincts par pays",
         distinctLede: "Nombre de libellés différents dans chaque pays, après les harmonisations.",
-        distinctCaption: (total, names, sum) => `${total} communautés distinctes. ${names} figurent dans plusieurs pays : la somme des barres est ${sum}.`,
+        distinctCaption: (total) => `${total} communautés distinctes.`,
       },
       en: {
         title: "Ethnocultural groups by country",
@@ -210,7 +210,7 @@
         distinctStat: "Distinct communities",
         distinctTitle: "Distinct groups by country",
         distinctLede: "Number of different labels in each country, after the harmonizations.",
-        distinctCaption: (total, names, sum) => `${total} distinct communities. ${names} appear in more than one country, so the bars add up to ${sum}.`,
+        distinctCaption: (total) => `${total} distinct communities.`,
       },
     };
 
@@ -284,20 +284,12 @@
     const totalDishes = overview.reduce((sum, item) => sum + item.dishes, 0);
     const sheetCount = COUNTRIES.reduce((sum, item) => sum + item.files.length, 0);
     const countedFiles = COUNTRIES.reduce((sum, item) => sum + keptFiles(item).length, 0);
-    const namesByCountry = new Map();
+    const distinctNames = new Set();
     for (const country of COUNTRIES) {
       const totals = merge(country.id, keptFiles(country));
-      for (const group of totals.groups) {
-        if (!namesByCountry.has(group.name)) namesByCountry.set(group.name, []);
-        namesByCountry.get(group.name).push(country);
-      }
+      for (const group of totals.groups) distinctNames.add(group.name);
     }
-    const distinctTotal = namesByCountry.size;
-    const distinctSum = overview.reduce((sum, item) => sum + item.labels, 0);
-    const sharedNames = [...namesByCountry.entries()]
-      .filter(([, list]) => list.length > 1)
-      .map(([name]) => name)
-      .sort((a, b) => a.localeCompare(b, "fr"));
+    const distinctTotal = distinctNames.size;
 
     function paintChrome() {
       const copy = t();
@@ -307,16 +299,16 @@
       document.querySelector("#lede").textContent = copy.lede;
       document.querySelector("#lang-fr").setAttribute("aria-pressed", String(lang === "fr"));
       document.querySelector("#lang-en").setAttribute("aria-pressed", String(lang === "en"));
-      document.querySelector("#stats").innerHTML = [
+    document.querySelector("#stats").innerHTML = [
         [String(COUNTRIES.length), copy.countries],
         [String(totalDishes), copy.dishes],
         [String(countedFiles), copy.files(sheetCount)],
         ["0", copy.empty],
         [String(distinctTotal), copy.distinctStat],
-      ].map(([value, label]) => `<div class="stat"><b>${value}</b><span>${label}</span></div>`).join("");
+    ].map(([value, label]) => `<div class="stat"><b>${value}</b><span>${label}</span></div>`).join("");
       document.querySelector("#distinct-title").textContent = copy.distinctTitle;
       document.querySelector("#distinct-lede").textContent = copy.distinctLede;
-      document.querySelector("#distinct-caption").textContent = copy.distinctCaption(distinctTotal, sharedNames.join(", "), distinctSum);
+      document.querySelector("#distinct-caption").textContent = copy.distinctCaption(distinctTotal);
       const byLabels = [...overview].sort((a, b) => b.labels - a.labels || a.name.localeCompare(b.name, lang));
       const axisMax = Math.max(10, Math.ceil(Math.max(...byLabels.map((item) => item.labels)) / 10) * 10);
       const axisMid = axisMax / 2;
@@ -349,12 +341,12 @@
       const rulesWrap = document.querySelector("#rules-wrap");
       rulesTable.innerHTML = table(
         copy.rulesHeaders,
-        RULES.map((rule) => {
-          const country = COUNTRIES.find((item) => item.id === rule.countryId);
+      RULES.map((rule) => {
+        const country = COUNTRIES.find((item) => item.id === rule.countryId);
           return [country ? displayCountry(country) : rule.countryId, rule.from, rule.to];
-        }),
-        []
-      );
+      }),
+      []
+    );
       const ruleRows = rulesTable.querySelectorAll("tbody tr");
       if (ruleRows.length > 10) {
         const top = rulesTable.getBoundingClientRect().top;
@@ -363,14 +355,14 @@
       } else {
         rulesWrap.style.maxHeight = "";
       }
-      document.querySelector("#overview").innerHTML = table(
+    document.querySelector("#overview").innerHTML = table(
         copy.compareHeaders,
         overview.map((item) => {
           const country = COUNTRIES.find((entry) => entry.name === item.name);
           return [country ? displayCountry(country) : item.name, String(item.dishes), String(item.labels), item.topName, String(item.topCount), item.share + "%"];
         }),
-        [1, 2, 4, 5]
-      );
+      [1, 2, 4, 5]
+    );
     }
 
     function render() {
