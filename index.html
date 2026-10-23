@@ -64,6 +64,8 @@
     .bar { height: 8px; background: var(--bar); }
     .caption { color: var(--muted); font-size: 0.85rem; margin-top: 8px; }
     .scroll { overflow-x: auto; border: 1px solid var(--line); }
+    .rules-scroll { overflow: auto; border: 1px solid var(--line); }
+    .rules-scroll thead th { position: sticky; top: 0; background: var(--paper); z-index: 1; }
     .compare-scroll { margin-top: 12px; }
     .compare-row { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
     @media (min-width: 1100px) {
@@ -106,7 +108,7 @@
 
     <section id="rules-section">
       <h2 id="rules-title"></h2>
-      <div class="scroll"><table id="rules"></table></div>
+      <div class="rules-scroll" id="rules-wrap"><table id="rules"></table></div>
       <p class="caption" id="rules-caption"></p>
     </section>
 
@@ -303,7 +305,9 @@
       const selectedId = countrySelect.value;
       countrySelect.innerHTML = COUNTRIES.map((country) => `<option value="${country.id}">${displayCountry(country)}</option>`).join("");
       countrySelect.value = selectedId || "benin";
-      document.querySelector("#rules").innerHTML = table(
+      const rulesTable = document.querySelector("#rules");
+      const rulesWrap = document.querySelector("#rules-wrap");
+      rulesTable.innerHTML = table(
         copy.rulesHeaders,
         RULES.map((rule) => {
           const country = COUNTRIES.find((item) => item.id === rule.countryId);
@@ -311,6 +315,14 @@
         }),
         []
       );
+      const ruleRows = rulesTable.querySelectorAll("tbody tr");
+      if (ruleRows.length > 10) {
+        const top = rulesTable.getBoundingClientRect().top;
+        const cut = ruleRows[10].getBoundingClientRect().top;
+        rulesWrap.style.maxHeight = `${Math.ceil(cut - top)}px`;
+      } else {
+        rulesWrap.style.maxHeight = "";
+      }
       document.querySelector("#overview").innerHTML = table(
         copy.compareHeaders,
         overview.map((item) => {
