@@ -77,6 +77,11 @@
     .share-track { height: 16px; background: #efeae3; }
     .share-fill { display: block; height: 100%; background: #3c7ea6; }
     .count-fill { display: block; height: 100%; background: var(--bar); }
+    .pie-row { display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+    .pie-row svg { width: min(240px, 100%); height: auto; flex: none; }
+    .pie-legend { list-style: none; margin: 0; padding: 0; }
+    .pie-legend li { display: flex; gap: 10px; align-items: baseline; margin: 10px 0; }
+    .swatch { width: 0.85rem; height: 0.85rem; flex: none; transform: translateY(0.1rem); }
     .share-value { font-variant-numeric: tabular-nums; text-align: right; }
     .share-axis { margin-top: 6px; color: var(--muted); font-size: 0.75rem; }
     .share-scale { display: flex; justify-content: space-between; }
@@ -137,6 +142,17 @@
     </section>
 
     <section>
+      <h2 id="pie-title"></h2>
+      <p class="lede" id="pie-lede"></p>
+      <figure class="share-chart">
+        <div class="pie-row">
+          <svg id="pie" viewBox="0 0 32 32" role="img"></svg>
+          <ul class="pie-legend" id="pie-legend"></ul>
+        </div>
+      </figure>
+    </section>
+
+    <section>
       <h2 id="distinct-title"></h2>
       <p class="lede" id="distinct-lede"></p>
       <figure class="share-chart">
@@ -180,6 +196,10 @@
         distinctTitle: "Groupes distincts par pays",
         distinctLede: "Nombre de libellés différents dans chaque pays, après les harmonisations.",
         distinctCaption: (total) => `${total} communautés distinctes.`,
+        pieTitle: "Plats avec exactement un groupe",
+        pieLede: "Le secteur principal reprend les plats rattachés à un seul groupe. L’autre secteur rassemble le reste du corpus.",
+        pieOne: "Exactement un groupe",
+        pieOther: "Les autres",
       },
       en: {
         title: "Ethnocultural groups by country",
@@ -211,6 +231,10 @@
         distinctTitle: "Distinct groups by country",
         distinctLede: "Number of different labels in each country, after the harmonizations.",
         distinctCaption: (total) => `${total} distinct communities.`,
+        pieTitle: "Dishes with exactly one group",
+        pieLede: "The main slice is the dishes tied to a single group. The other slice is the rest of the corpus.",
+        pieOne: "Exactly one group",
+        pieOther: "The others",
       },
     };
 
@@ -290,6 +314,8 @@
       for (const group of totals.groups) distinctNames.add(group.name);
     }
     const distinctTotal = distinctNames.size;
+    const oneGroupDishes = 662;
+    const otherDishes = totalDishes - oneGroupDishes;
 
     function paintChrome() {
       const copy = t();
@@ -306,6 +332,32 @@
         ["0", copy.empty],
         [String(distinctTotal), copy.distinctStat],
     ].map(([value, label]) => `<div class="stat"><b>${value}</b><span>${label}</span></div>`).join("");
+      document.querySelector("#pie-title").textContent = copy.pieTitle;
+      document.querySelector("#pie-lede").textContent = copy.pieLede;
+      const pieSlices = [
+        { label: copy.pieOne, count: oneGroupDishes, color: "#8c3d2a" },
+        { label: copy.pieOther, count: otherDishes, color: "#3c7ea6" },
+      ];
+      const pieTotal = pieSlices.reduce((sum, slice) => sum + slice.count, 0);
+      function piePath(start, end) {
+        const angle = (value) => (value / pieTotal) * Math.PI * 2 - Math.PI / 2;
+        const point = (value) => [16 + 15.2 * Math.cos(angle(value)), 16 + 15.2 * Math.sin(angle(value))];
+        const [x0, y0] = point(start);
+        const [x1, y1] = point(end);
+        const large = end - start > pieTotal / 2 ? 1 : 0;
+        return `M 16 16 L ${x0} ${y0} A 15.2 15.2 0 ${large} 1 ${x1} ${y1} Z`;
+      }
+      let pieCursor = 0;
+      document.querySelector("#pie").innerHTML = pieSlices.map((slice) => {
+        const start = pieCursor;
+        pieCursor += slice.count;
+        return `<path d="${piePath(start, pieCursor)}" fill="${slice.color}"><title>${slice.label}: ${slice.count}</title></path>`;
+      }).join("");
+      document.querySelector("#pie").setAttribute("aria-label", pieSlices.map((slice) => `${slice.label} ${slice.count}`).join(", "));
+      document.querySelector("#pie-legend").innerHTML = pieSlices.map((slice) => {
+        const share = Math.round((100 * slice.count) / pieTotal);
+        return `<li><span class="swatch" style="background:${slice.color}"></span><span><b>${slice.label}</b><br>${slice.count} · ${share}%</span></li>`;
+      }).join("");
       document.querySelector("#distinct-title").textContent = copy.distinctTitle;
       document.querySelector("#distinct-lede").textContent = copy.distinctLede;
       document.querySelector("#distinct-caption").textContent = copy.distinctCaption(distinctTotal);
