@@ -177,8 +177,8 @@
         lede: "Nous analysons ici la colonne « Social / ethnocultural group association », afin de mieux comprendre la diversité de la couverture culturelle du corpus collecté. L’extraction des données date du 22 octobre.",
         ledeDate: "22 octobre",
         countries: "Pays",
-        dishes: "Plats, copies identiques comptées une fois",
-        files: (n) => `Fichiers comptés, sur ${n} feuilles`,
+        dishes: "Plats",
+        dialects: "Dialectes terminés",
         oneGroupStat: "Plats des 102 communautés distinctes",
         rulesTitle: "Harmonisations",
         rulesCaption: "Le libellé retenu est celui fixé pour chaque regroupement.",
@@ -215,8 +215,8 @@
         lede: "Here we analyse the column “Social / ethnocultural group association”, to better understand the diversity of the cultural coverage of the collected dataset. The data dump was made on October 22nd.",
         ledeDate: "October 22nd",
         countries: "Countries",
-        dishes: "Dishes, identical copies counted once",
-        files: (n) => `Files counted, out of ${n} sheets`,
+        dishes: "Dishes",
+        dialects: "Dialects completed",
         oneGroupStat: "Dishes in the 102 distinct communities",
         rulesTitle: "Harmonizations",
         rulesCaption: "The kept label is the one set for each grouping.",
@@ -317,7 +317,6 @@
     }).sort((a, b) => b.dishes - a.dishes || a.name.localeCompare(b.name, lang));
 
     const totalDishes = overview.reduce((sum, item) => sum + item.dishes, 0);
-    const sheetCount = COUNTRIES.reduce((sum, item) => sum + item.files.length, 0);
     const countedFiles = COUNTRIES.reduce((sum, item) => sum + keptFiles(item).length, 0);
     const oneGroupDishes = 662;
     const otherDishes = totalDishes - oneGroupDishes;
@@ -354,7 +353,7 @@
     document.querySelector("#stats").innerHTML = [
         [String(COUNTRIES.length), copy.countries],
         [String(totalDishes), copy.dishes],
-        [String(countedFiles), copy.files(sheetCount)],
+        [String(countedFiles), copy.dialects],
         [String(oneGroupDishes), copy.oneGroupStat],
         [String(distinctTotal), copy.distinctStat],
     ].map(([value, label]) => `<div class="stat"><b>${value}</b><span>${label}</span></div>`).join("");
